@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kavia HRMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy: #0a1628;
+  --navy2: #0f2040;
+  --teal: #00c9a7;
+  --teal2: #00e5bc;
+  --gold: #f5a623;
+  --red: #ff4d6d;
+  --white: #f8faff;
+  --gray: #8899bb;
+  --card: #111f38;
+  --card2: #162540;
+  --border: #1e3058;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--navy); color:var(--white); font-family:var(--font-body); min-height:100vh; overflow-x:hidden; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position:fixed; left:0; top:0; width:220px; height:100vh;
+  background:var(--navy2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; z-index:100;
+  transition: transform 0.3s;
+}
+.logo {
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--border);
+}
+.logo h1 { font-family:var(--font-head); font-size:20px; font-weight:800; color:var(--teal); letter-spacing:1px; }
+.logo p { font-size:10px; color:var(--gray); text-transform:uppercase; letter-spacing:2px; margin-top:2px; }
+
+nav { flex:1; overflow-y:auto; padding:16px 0; }
+.nav-section { padding:8px 20px 4px; font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--gray); }
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 20px; cursor:pointer; font-size:13px;
+  color:var(--gray); transition:all 0.2s; border-left:3px solid transparent;
+}
+.nav-item:hover { color:var(--white); background:rgba(0,201,167,0.07); }
+.nav-item.active { color:var(--teal); border-left-color:var(--teal); background:rgba(0,201,167,0.1); font-weight:500; }
+.nav-item .icon { font-size:16px; width:20px; text-align:center; }
+
+/* ── MAIN ── */
+#main { margin-left:220px; min-height:100vh; }
+#topbar {
+  position:sticky; top:0; z-index:50;
+  background:rgba(10,22,40,0.95); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 32px;
+}
+#topbar h2 { font-family:var(--font-head); font-size:18px; font-weight:700; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.badge { background:var(--teal); color:var(--navy); font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:1px; }
+
+#content { padding:28px 32px; }
+
+/* ── PAGES ── */
+.page { display:none; animation: fadeIn 0.3s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── CARDS ── */
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:28px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:28px; }
+
+.stat-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:20px; position:relative; overflow:hidden;
+}
+.stat-card::before { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:var(--teal); }
+.stat-card.gold::before { background:var(--gold); }
+.stat-card.red::before { background:var(--red); }
+.stat-card.purple::before { background:#a78bfa; }
+.stat-card h3 { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:var(--gray); margin-bottom:8px; }
+.stat-card .number { font-family:var(--font-head); font-size:36px; font-weight:800; }
+.stat-card .sub { font-size:12px; color:var(--gray); margin-top:4px; }
+.stat-card .icon-bg { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:40px; opacity:0.1; }
+
+.card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px;
+}
+.card h3 { font-family:var(--font-head); font-size:15px; font-weight:700; margin-bottom:16px; color:var(--teal); }
+
+/* ── CHECKLIST ── */
+.checklist-phase { margin-bottom:20px; }
+.phase-title {
+  background:rgba(0,201,167,0.12); border-left:3px solid var(--teal);
+  padding:8px 14px; font-weight:600; font-size:13px; margin-bottom:10px; border-radius:0 8px 8px 0;
+}
+.check-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:7px 12px; border-radius:8px; cursor:pointer;
+  transition:background 0.15s; font-size:13px;
+}
+.check-item:hover { background:rgba(255,255,255,0.04); }
+.check-item input[type=checkbox] { accent-color:var(--teal); width:15px; height:15px; margin-top:1px; flex-shrink:0; }
+.check-item.done label { text-decoration:line-through; color:var(--gray); }
+.check-item label { cursor:pointer; }
+
+/* ── AI CHAT ── */
+#ai-page { height:calc(100vh - 130px); display:none; flex-direction:column; }
+#ai-page.active { display:flex; }
+.chat-window {
+  flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px;
+  background:var(--card); border:1px solid var(--border); border-radius:14px 14px 0 0;
+}
+.msg { max-width:75%; display:flex; flex-direction:column; gap:4px; }
+.msg.user { align-self:flex-end; }
+.msg.bot { align-self:flex-start; }
+.msg-bubble {
+  padding:12px 16px; border-radius:14px; font-size:13.5px; line-height:1.6;
+  white-space:pre-wrap;
+}
+.msg.user .msg-bubble { background:var(--teal); color:var(--navy); font-weight:500; border-radius:14px 14px 4px 14px; }
+.msg.bot .msg-bubble { background:var(--card2); border:1px solid var(--border); border-radius:14px 14px 14px 4px; }
+.msg-meta { font-size:10px; color:var(--gray); padding:0 4px; }
+.msg.user .msg-meta { text-align:right; }
+
+.chat-input-row {
+  display:flex; gap:10px; padding:14px 16px;
+  background:var(--card2); border:1px solid var(--border); border-top:none; border-radius:0 0 14px 14px;
+}
+.chat-input-row input {
+  flex:1; background:var(--navy); border:1px solid var(--border); border-radius:10px;
+  padding:10px 16px; color:var(--white); font-family:var(--font-body); font-size:14px;
+  outline:none;
+}
+.chat-input-row input:focus { border-color:var(--teal); }
+.btn {
+  background:var(--teal); color:var(--navy); border:none; border-radius:10px;
+  padding:10px 20px; font-weight:700; cursor:pointer; font-family:var(--font-head);
+  font-size:13px; transition:background 0.2s;
+}
+.btn:hover { background:var(--teal2); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.btn-ghost {
+  background:transparent; border:1px solid var(--border); color:var(--gray);
+  border-radius:8px; padding:7px 14px; cursor:pointer; font-size:12px; transition:all 0.2s;
+}
+.btn-ghost:hover { border-color:var(--teal); color:var(--teal); }
+
+.quick-prompts { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.qp { background:rgba(0,201,167,0.1); border:1px solid rgba(0,201,167,0.25); color:var(--teal);
+  border-radius:20px; padding:6px 14px; font-size:12px; cursor:pointer; transition:all 0.2s; }
+.qp:hover { background:rgba(0,201,167,0.2); }
+
+/* ── MAIL TEMPLATES ── */
+.template-card {
+  background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px;
+}
+.template-card h4 { font-family:var(--font-head); color:var(--gold); margin-bottom:8px; font-size:14px; }
+.template-subject { font-size:12px; color:var(--gray); margin-bottom:12px; }
+.template-body {
+  background:var(--navy); border:1px solid var(--border); border-radius:8px;
+  padding:14px; font-size:12.5px; line-height:1.7; white-space:pre-wrap; color:var(--white);
+  max-height:180px; overflow-y:auto;
+}
+.copy-btn { margin-top:10px; }
+
+/* ── LINKS LIST ── */
+.link-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; background:var(--card2); border:1px solid var(--border);
+  border-radius:10px; margin-bottom:8px; transition:border-color 0.2s;
+}
+.link-item:hover { border-color:var(--teal); }
+.link-item .link-label { font-size:13px; display:flex; align-items:center; gap:8px; }
+.link-item .link-tag { font-size:10px; background:rgba(0,201,167,0.1); color:var(--teal); padding:2px 8px; border-radius:10px; }
+.link-item a { color:var(--teal); font-size:12px; text-decoration:none; }
+.link-item a:hover { text-decoration:underline; }
+
+/* ── SECTION HEADER ── */
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.section-header h2 { font-family:var(--font-head); font-size:22px; font-weight:800; }
+.section-header p { font-size:13px; color:var(--gray); margin-top:4px; }
+
+/* ── DISC ── */
+.disc-card { background:var(--card2); border-radius:12px; padding:18px; border:1px solid var(--border); text-align:center; }
+.disc-letter { font-family:var(--font-head); font-size:52px; font-weight:800; }
+.disc-card.D .disc-letter { color:#ff4d6d; }
+.disc-card.I .disc-letter { color:#f5a623; }
+.disc-card.S .disc-letter { color:#00c9a7; }
+.disc-card.C .disc-letter { color:#a78bfa; }
+.disc-card h4 { font-size:13px; margin-bottom:6px; font-weight:600; }
+.disc-card p { font-size:11.5px; color:var(--gray); line-height:1.5; }
+
+/* ── PROGRESS ── */
+.progress-bar { height:6px; background:var(--border); border-radius:3px; margin-top:8px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:3px; background:var(--teal); transition:width 1s ease; }
+
+/* ── TYPING INDICATOR ── */
+.typing { display:flex; gap:4px; align-items:center; padding:12px 16px; }
+.typing span { width:7px; height:7px; border-radius:50%; background:var(--gray); animation:bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay:0.2s; }
+.typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+/* ── TOAST ── */
+#toast {
+  position:fixed; bottom:24px; right:24px; background:var(--teal); color:var(--navy);
+  padding:12px 20px; border-radius:10px; font-weight:600; font-size:13px;
+  transform:translateY(80px); opacity:0; transition:all 0.3s; z-index:999;
+}
+#toast.show { transform:translateY(0); opacity:1; }
+
+/* ── MOBILE ── */
+@media(max-width:768px) {
+  #sidebar { transform:translateX(-220px); }
+  #sidebar.open { transform:translateX(0); }
+  #main { margin-left:0; }
+  .grid-4 { grid-template-columns:1fr 1fr; }
+  .grid-3 { grid-template-columns:1fr; }
+  .grid-2 { grid-template-columns:1fr; }
+  #menu-btn { display:flex; }
+}
+#menu-btn { display:none; background:none; border:none; color:var(--white); font-size:22px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="logo">
+    <h1>⚙ KAVIA</h1>
+    <p>HR Management System</p>
+  </div>
+  <nav>
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="icon">🏠</span> Dashboard</div>
+    <div class="nav-item" onclick="navigate('ai')"><span class="icon">🤖</span> AI HR Agent</div>
+
+    <div class="nav-section">Modules</div>
+    <div class="nav-item" onclick="navigate('talent')"><span class="icon">🎯</span> Talent Acquisition</div>
+    <div class="nav-item" onclick="navigate('onboarding')"><span class="icon">🚀</span> On Boarding</div>
+    <div class="nav-item" onclick="navigate('performance')"><span class="icon">📊</span> Performance</div>
+    <div class="nav-item" onclick="navigate('payroll')"><span class="icon">💰</span> Payroll</div>
+    <div class="nav-item" onclick="navigate('learning')"><span class="icon">📚</span> Learning</div>
+    <div class="nav-item" onclick="navigate('exit')"><span class="icon">🚪</span> Exit</div>
+
+    <div class="nav-section">Culture & Admin</div>
+    <div class="nav-item" onclick="navigate('culture')"><span class="icon">🌟</span> Culture</div>
+    <div class="nav-item" onclick="navigate('admin')"><span class="icon">🛠</span> Admin</div>
+    <div class="nav-item" onclick="navigate('hrprocess')"><span class="icon">📋</span> HR Process</div>
+    <div class="nav-item" onclick="navigate('mailtemplates')"><span class="icon">✉️</span> Mail Templates</div>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div>
+        <h2 id="page-title">Dashboard</h2>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="badge">Kavia HR</span>
+      <span style="font-size:13px;color:var(--gray)" id="clock"></span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="grid-4">
+        <div class="stat-card">
+          <h3>Open Positions</h3>
+          <div class="number teal">–</div>
+          <div class="sub">Active requisitions</div>
+          <div class="icon-bg">🎯</div>
+        </div>
+        <div class="stat-card gold">
+          <h3>Pending Onboarding</h3>
+          <div class="number" style="color:var(--gold)">–</div>
+          <div class="sub">Joining this month</div>
+          <div class="icon-bg">🚀</div>
+        </div>
+        <div class="stat-card red">
+          <h3>Exit In Progress</h3>
+          <div class="number" style="color:var(--red)">–</div>
+          <div class="sub">In notice period</div>
+          <div class="icon-bg">🚪</div>
+        </div>
+        <div class="stat-card purple">
+          <h3>Training Pending</h3>
+          <div class="number" style="color:#a78bfa">–</div>
+          <div class="sub">Tests incomplete</div>
+          <div class="icon-bg">📚</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>📍 Site Map — Quick Navigate</h3>
+          <div class="link-item"><div class="link-label"><span>🎯</span> Talent Acquisition <span class="link-tag">Hiring</span></div><a href="#" onclick="navigate('talent')">Open →</a></div>
+          <div class="link-item"><div class="link-label"><span>🚀</span> On Boarding <span class="link-tag">Joining</span></div><a href="#" onclick="navigate('onboarding')">Open →</a></div>
+          <div class="link-item"><div class="link-label"><span>📊</span> Performance Mgmt <span class="link-tag">KRA/KPI</span></div><a href="#" onclick="navigate('performance')">Open →</a></div>
+          <div class="link-item"><div class="link-label"><span>💰</span> Payroll <span class="link-tag">Salary</span></div><a href="#" onclick="navigate('payroll')">Open →</a></div>
+          <div class="link-item"><div class="link-label"><span>📚</span> Learning Mgmt <span class="link-tag">Training</span></div><a href="#" onclick="navigate('learning')">Open →</a></div>
+          <div class="link-item"><div class="link-label"><span>🚪</span> Exit Process <span class="link-tag">F&F</span></div><a href="#" onclick="navigate('exit')">Open →</a></div>
+        </div>
+        <div class="card">
+          <h3>🔗 Key HR Resources</h3>
+          <div class="link-item"><div class="link-label">📁 HR Policy Folder</div><a href="https://drive.google.com/drive/folders/1bo5GwnJBBjc3GYOkgcAvaQx5kORpiRsp" target="_blank">Open Drive</a></div>
+          <div class="link-item"><div class="link-label">📄 HR Manual</div><a href="https://docs.google.com/document/d/1PFgm3X3z06kQ8VT1eco2by_OjOzScH8j47xkkGIu1ls/edit" target="_blank">Open Doc</a></div>
+          <div class="link-item"><div class="link-label">📝 Recruitment Requisition Form</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSeCYjew2kEzoYssFgl768-ExwlWCS9CvX0-GYBD3L5Ch9R4WQ/viewform" target="_blank">Open Form</a></div>
+          <div class="link-item"><div class="link-label">📊 KPI & KRA Sheet</div><a href="https://docs.google.com/spreadsheets/d/1uEHjcI7TJaOubu2bxwnlE3Tx7KDIS1gjSMq5sAWaIaA/edit" target="_blank">Open Sheet</a></div>
+          <div class="link-item"><div class="link-label">📄 Create Offer Letter</div><a href="https://docs.google.com/spreadsheets/d/1QU-FmNHq0Wu1iWb5rDKlFkO21DIZ5SdAQlWzoK3N-eY/edit" target="_blank">Open Sheet</a></div>
+          <div class="link-item"><div class="link-label">🎥 Video Call (Jitsi)</div><a href="https://meet.jit.si/cbx" target="_blank">Let's Talk</a></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h3>🤖 Ask AI HR Agent</h3>
+        <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Get instant help with SOPs, checklists, policies, and more.</p>
+        <div class="quick-prompts">
+          <span class="qp" onclick="navigate('ai');setQ('Give me the complete recruitment SOP checklist')">📋 Recruitment SOP</span>
+          <span class="qp" onclick="navigate('ai');setQ('Draft an offer letter for a Mechanical Engineer joining at 4.5 LPA')">✉️ Draft Offer Letter</span>
+          <span class="qp" onclick="navigate('ai');setQ('What is the exit process checklist?')">🚪 Exit Checklist</span>
+          <span class="qp" onclick="navigate('ai');setQ('Explain DISC personality analysis and how to use it in hiring')">🎭 DISC Analysis</span>
+          <span class="qp" onclick="navigate('ai');setQ('What documents are required during onboarding?')">📁 Onboarding Docs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI PAGE -->
+    <div class="page" id="page-ai" style="height:calc(100vh - 130px);display:none;flex-direction:column;">
+      <div class="section-header" style="margin-bottom:14px">
+        <div><h2 style="font-family:var(--font-head)">🤖 AI HR Agent</h2><p>Ask anything about HR processes, SOPs, checklists, policies</p></div>
+      </div>
+      <div id="api-key-section" style="background:#162540;border:1px solid #f5a623;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+        <div style="font-size:13px;color:#f5a623;font-weight:600;margin-bottom:6px;">⚙️ API Key Setup (sirf ek baar)</div>
+        <div style="font-size:12px;color:#8899bb;margin-bottom:10px;">Apni Anthropic API key yahan daalo — browser session mein save hogi</div>
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="flex:1;background:#0a1628;border:1px solid #1e3058;border-radius:8px;padding:8px 12px;color:#f8faff;font-size:13px;outline:none;font-family:monospace;"/>
+          <button onclick="saveApiKey()" style="background:#00c9a7;color:#0a1628;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px;">Save</button>
+        </div>
+        <div id="key-saved-msg" style="display:none;font-size:12px;color:#00c9a7;margin-top:6px;">✅ API Key saved! Ab AI se baat karo.</div>
+      </div>
+      <input type="hidden" id="api-key-store" value=""/>
+      <div class="quick-prompts" id="ai-quick">
+        <span class="qp" onclick="sendQuick('Give me the complete recruitment SOP checklist')">📋 Recruitment SOP</span>
+        <span class="qp" onclick="sendQuick('Draft an offer letter for BE Mechanical Engineer, 4.5 LPA')">✉️ Offer Letter</span>
+        <span class="qp" onclick="sendQuick('What is the onboarding checklist for a new joiner?')">🚀 Onboarding</span>
+        <span class="qp" onclick="sendQuick('Explain the exit process step by step')">🚪 Exit Process</span>
+        <span class="qp" onclick="sendQuick('How to conduct a DISC personality analysis?')">🎭 DISC</span>
+        <span class="qp" onclick="sendQuick('What are the KPI review steps for performance management?')">📊 Performance</span>
+      </div>
+      <div class="chat-window" id="chat-window">
+        <div class="msg bot">
+          <div class="msg-bubble">👋 Namaste! I am <strong>KaviaHR Assistant</strong> — your AI-powered HR agent.<br><br>I can help you with:<br>• 📋 Recruitment SOPs & checklists<br>• 🚀 Onboarding steps<br>• 📊 Performance review guidance<br>• ✉️ Drafting offer letters & emails<br>• 🚪 Exit process<br>• 🎭 DISC personality insights<br>• 📋 Policy queries<br><br>Type your question below or pick a quick prompt!</div>
+          <div class="msg-meta">KaviaHR Agent</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ask anything… e.g. 'What documents to collect during onboarding?'" onkeydown="if(event.key==='Enter')sendMessage()"/>
+        <button class="btn" id="send-btn" onclick="sendMessage()">Send ➤</button>
+      </div>
+    </div>
+
+    <!-- TALENT ACQUISITION -->
+    <div class="page" id="page-talent">
+      <div class="section-header"><div><h2>🎯 Talent Acquisition</h2><p>Recruitment forms, trackers, test papers & offer letters</p></div></div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>📝 Recruitment Forms</h3>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> Recruitment Requisition</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSeCYjew2kEzoYssFgl768-ExwlWCS9CvX0-GYBD3L5Ch9R4WQ/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Sheet</span> Requisition Responses</div><a href="https://docs.google.com/spreadsheets/d/1kb8jaThspQtxbTcUxXWWUChKq6mqmGLbFA5Fys0s5BQ/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> Recruitment Tracker</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSfftZ3XUDxnmMc1JST6cPjFo2Ni74nsFcyTA-CU_HK3dHM8PQ/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Sheet</span> Tracker Responses</div><a href="https://docs.google.com/spreadsheets/d/12qdz33B1Va73FEZEzVrDn0MHRxCaOu464moDSMxF9A4/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> Candidate Visit Form</div><a href="https://docs.google.com/forms/d/1Ym_YTKDuiyzSzmtFArPivekaKNZT2Fd0Ejd8o9U5Zqw/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> Interview Feedback</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSfH0V1QkvtNsDH08GJ_RJZhfZ3vKrxvaj2j2ZuVIKBoLp1sTQ/viewform" target="_blank">Open</a></div>
+        </div>
+        <div class="card">
+          <h3>📄 Test Papers</h3>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> 10th Test Paper</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSe9Wvq_MSBcDFEZpMjuxdrSXw5KwwgN49SdmbciUTzVOBcxqw/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> 12th Maths & English</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSdhjDMqY_GuVkCCoGPq4UKC3f8CTq-isA9uwOIgayfjn0JZvA/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> ITI Test Paper</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSflG-0gWKpkGM_AuSKYXp5BgQnsITA1-Rlfxyxg7bHwtaJ9sQ/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> DME Test Paper</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSd4dhSWARdSbX0QxvPIdl2Zsb2F3Gm9weaTA2EQ6cw9AcYGOw/viewform" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> BE Mechanical Test</div><a href="https://docs.google.com/forms/d/1O3AOehVf_JykubJBnczLfApbrmP0kdICMjVW_BNekBM/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> BE Electrical Test</div><a href="https://docs.google.com/forms/d/1mJSIQboaPdt7RMDb3K95VMo5bwEo-G9PzqeVHtG1snM/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Form</span> HR Test Paper</div><a href="https://docs.google.com/forms/d/e/1FAIpQLScK-Xt9K_l2q_dE5o1wKVp0YiLB96cdju76Nu7K9k4EPt71TA/viewform" target="_blank">Open</a></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>📊 Role Clarity</h3>
+          <div class="link-item"><div class="link-label">KPI & KRA Sheet</div><a href="https://docs.google.com/spreadsheets/d/1uEHjcI7TJaOubu2bxwnlE3Tx7KDIS1gjSMq5sAWaIaA/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label">JD / Time Plan</div><a href="https://docs.google.com/spreadsheets/d/1BxFi132ZgWISrzTEVRVxZPrVTHhKnyg5CZ1ew9VQCgk/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label">Create Offer Letter</div><a href="https://docs.google.com/spreadsheets/d/1QU-FmNHq0Wu1iWb5rDKlFkO21DIZ5SdAQlWzoK3N-eY/edit" target="_blank">Open</a></div>
+        </div>
+        <div class="card">
+          <h3>🎭 DISC Analysis</h3>
+          <div class="grid-4" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:0">
+            <div class="disc-card D"><div class="disc-letter">D</div><h4>Dominant</h4><p>Results-driven, decisive, direct</p></div>
+            <div class="disc-card I"><div class="disc-letter">I</div><h4>Influential</h4><p>Enthusiastic, social, optimistic</p></div>
+            <div class="disc-card S"><div class="disc-letter">S</div><h4>Steady</h4><p>Patient, reliable, team player</p></div>
+            <div class="disc-card C"><div class="disc-letter">C</div><h4>Conscientious</h4><p>Analytical, accurate, careful</p></div>
+          </div>
+          <div style="margin-top:14px">
+            <a href="http://disc.ceoitbox.com/" target="_blank" class="btn" style="display:inline-block;text-decoration:none">Take DISC Test →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>✅ Recruitment SOP Checklist</h3>
+        <div id="recruitment-checklist"></div>
+      </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="page" id="page-onboarding">
+      <div class="section-header"><div><h2>🚀 On Boarding</h2><p>New joiner steps, document collection & induction</p></div></div>
+      <div class="card">
+        <h3>✅ Onboarding Checklist</h3>
+        <div id="onboarding-checklist"></div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="page" id="page-performance">
+      <div class="section-header"><div><h2>📊 Performance Management</h2><p>KRA/KPI setting, reviews & appraisals</p></div></div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>🔗 Performance Resources</h3>
+          <div class="link-item"><div class="link-label">KPI & KRA Sheet</div><a href="https://docs.google.com/spreadsheets/d/1uEHjcI7TJaOubu2bxwnlE3Tx7KDIS1gjSMq5sAWaIaA/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label">JD / Time Plan</div><a href="https://docs.google.com/spreadsheets/d/1BxFi132ZgWISrzTEVRVxZPrVTHhKnyg5CZ1ew9VQCgk/edit" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label">HR Manual</div><a href="https://docs.google.com/document/d/1PFgm3X3z06kQ8VT1eco2by_OjOzScH8j47xkkGIu1ls/edit" target="_blank">Open</a></div>
+        </div>
+        <div class="card">
+          <h3>📈 Performance Cycle</h3>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Goal Setting</span><span style="color:var(--teal)">Q1</span></div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Mid-Year Review</span><span style="color:var(--gold)">Q2-Q3</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--gold)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Annual Appraisal</span><span style="color:#a78bfa">Q4</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%;background:#a78bfa"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>✅ Performance Management Checklist</h3>
+        <div id="performance-checklist"></div>
+      </div>
+    </div>
+
+    <!-- PAYROLL -->
+    <div class="page" id="page-payroll">
+      <div class="section-header"><div><h2>💰 Payroll</h2><p>Salary processing & employee information</p></div></div>
+      <div class="card">
+        <h3>🔗 Payroll Resources</h3>
+        <div class="link-item"><div class="link-label">Employee Information Sheet</div><a href="https://sites.google.com/kavia.co.in/employee-compass/payroll" target="_blank">Open</a></div>
+        <div class="link-item"><div class="link-label">HR Policy Folder</div><a href="https://drive.google.com/drive/folders/1bo5GwnJBBjc3GYOkgcAvaQx5kORpiRsp" target="_blank">Open Drive</a></div>
+        <div class="link-item"><div class="link-label">HR Manual</div><a href="https://docs.google.com/document/d/1PFgm3X3z06kQ8VT1eco2by_OjOzScH8j47xkkGIu1ls/edit" target="_blank">Open Doc</a></div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h3>💡 Ask AI for Payroll Help</h3>
+        <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Get guidance on salary structures, CTC breakdown, compliance, etc.</p>
+        <button class="btn" onclick="navigate('ai');setQ('Explain the typical payroll process and CTC structure for a manufacturing company in Bangalore')">Ask AI about Payroll →</button>
+      </div>
+    </div>
+
+    <!-- LEARNING -->
+    <div class="page" id="page-learning">
+      <div class="section-header"><div><h2>📚 Learning Management</h2><p>Induction, training tests & development</p></div></div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>🎓 Tests & Assessments</h3>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Test</span> Induction Test</div><a href="https://sites.google.com/kavia.co.in/employee-compass/learning/induction-test" target="_blank">Open</a></div>
+          <div class="link-item"><div class="link-label"><span class="link-tag">Test</span> Training Test</div><a href="https://sites.google.com/kavia.co.in/employee-compass/learning/training-test" target="_blank">Open</a></div>
+        </div>
+        <div class="card">
+          <h3>💡 AI Learning Suggestions</h3>
+          <button class="btn-ghost" style="width:100%;margin-bottom:8px" onclick="navigate('ai');setQ('Create a 30-day induction training plan for a new manufacturing engineer at Kavia')">📋 Induction Plan</button>
+          <button class="btn-ghost" style="width:100%;margin-bottom:8px" onclick="navigate('ai');setQ('What training topics should be covered for HR executives in a manufacturing company?')">👩‍💼 HR Training Topics</button>
+          <button class="btn-ghost" style="width:100%" onclick="navigate('ai');setQ('Create a skills development plan for a fresher joining as a production engineer')">⚙️ Skills Development</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXIT -->
+    <div class="page" id="page-exit">
+      <div class="section-header"><div><h2>🚪 Exit Process</h2><p>Resignation, notice period, F&F & relieving</p></div></div>
+      <div class="card">
+        <h3>✅ Exit Process Checklist</h3>
+        <div id="exit-checklist"></div>
+      </div>
+    </div>
+
+    <!-- CULTURE -->
+    <div class="page" id="page-culture">
+      <div class="section-header"><div><h2>🌟 Culture</h2><p>Core values, purpose & culture charter</p></div></div>
+      <div class="grid-3">
+        <div class="card" style="text-align:center">
+          <div style="font-size:40px;margin-bottom:12px">🏆</div>
+          <h3>Core Values</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:8px">The principles that guide every decision at Kavia.</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/culture/core-values" target="_blank" class="btn" style="display:inline-block;margin-top:14px;text-decoration:none">View →</a>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:40px;margin-bottom:12px">🎯</div>
+          <h3>Purpose</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:8px">Why we do what we do — our north star.</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/culture/purpose" target="_blank" class="btn" style="display:inline-block;margin-top:14px;text-decoration:none">View →</a>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:40px;margin-bottom:12px">📜</div>
+          <h3>Culture Charter</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:8px">How we work together, every day.</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/culture/culture-charter" target="_blank" class="btn" style="display:inline-block;margin-top:14px;text-decoration:none">View →</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3>💡 AI: Culture & Values Help</h3>
+        <div class="quick-prompts">
+          <span class="qp" onclick="navigate('ai');setQ('How to build a strong company culture in a manufacturing firm?')">🏭 Manufacturing Culture</span>
+          <span class="qp" onclick="navigate('ai');setQ('How to communicate core values to new employees during induction?')">📢 Communicate Values</span>
+          <span class="qp" onclick="navigate('ai');setQ('Draft a culture charter for a precision engineering company')">📜 Draft Charter</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="section-header"><div><h2>🛠 Admin</h2><p>Office administration & facilities</p></div></div>
+      <div class="card">
+        <h3>🔗 Admin Resources</h3>
+        <div class="link-item"><div class="link-label">Admin Section</div><a href="https://sites.google.com/kavia.co.in/employee-compass/admin" target="_blank">Open</a></div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h3>💡 Ask AI for Admin SOPs</h3>
+        <div class="quick-prompts">
+          <span class="qp" onclick="navigate('ai');setQ('Create a visitor management SOP for a manufacturing plant')">🏭 Visitor SOP</span>
+          <span class="qp" onclick="navigate('ai');setQ('Create an asset management checklist for IT equipment handover')">💻 Asset Checklist</span>
+          <span class="qp" onclick="navigate('ai');setQ('Draft an office housekeeping and maintenance SOP')">🧹 Housekeeping SOP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HR PROCESS -->
+    <div class="page" id="page-hrprocess">
+      <div class="section-header"><div><h2>📋 HR Process</h2><p>MOM, calendar & policy</p></div></div>
+      <div class="grid-3">
+        <div class="card" style="text-align:center">
+          <div style="font-size:36px;margin-bottom:10px">📝</div>
+          <h3>MOM</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:6px">Minutes of Meetings</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/hr-process/mom" target="_blank" class="btn" style="display:inline-block;margin-top:12px;text-decoration:none">Open →</a>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:36px;margin-bottom:10px">📅</div>
+          <h3>HR Calendar</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:6px">Events & deadlines</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/hr-process/calendar" target="_blank" class="btn" style="display:inline-block;margin-top:12px;text-decoration:none">Open →</a>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:36px;margin-bottom:10px">📜</div>
+          <h3>Policy</h3>
+          <p style="font-size:13px;color:var(--gray);margin-top:6px">HR policies & guidelines</p>
+          <a href="https://sites.google.com/kavia.co.in/employee-compass/hr-process/policy" target="_blank" class="btn" style="display:inline-block;margin-top:12px;text-decoration:none">Open →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIL TEMPLATES -->
+    <div class="page" id="page-mailtemplates">
+      <div class="section-header"><div><h2>✉️ Mail Templates</h2><p>Ready-to-use email templates for HR communications</p></div></div>
+      <div id="mail-templates-container"></div>
+      <div class="card" style="margin-top:8px">
+        <h3>🤖 AI: Generate Custom Email</h3>
+        <p style="font-size:13px;color:var(--gray);margin-bottom:14px">Need a custom email? Describe it and AI will draft it.</p>
+        <input id="mail-custom-input" type="text" placeholder="e.g. Regret email to rejected candidate for Senior Engineer role" style="width:100%;background:var(--navy);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--white);font-size:13px;outline:none;margin-bottom:10px"/>
+        <button class="btn" onclick="generateCustomMail()">Generate with AI ✨</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div id="toast"></div>
+
+<script>
+// ── Navigation ─────────────────────────────────────────────
+const pageTitles = {
+  dashboard:'Dashboard', ai:'AI HR Agent', talent:'Talent Acquisition',
+  onboarding:'On Boarding', performance:'Performance', payroll:'Payroll',
+  learning:'Learning Management', exit:'Exit Process', culture:'Culture',
+  admin:'Admin', hrprocess:'HR Process', mailtemplates:'Mail Templates'
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const el = document.getElementById('page-'+page);
+  if (el) {
+    el.style.display = (page === 'ai') ? 'flex' : 'block';
+    el.classList.add('active');
+  }
+  const navEl = document.querySelector(`.nav-item[onclick="navigate('${page}')"]`);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page] || page;
+
+  // close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ── Clock ──────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── Checklists ─────────────────────────────────────────────
+const checklists = {
+  recruitment: {
+    phases: [
+      { name:'📋 Requisition', items:['Raise Recruitment Requisition Form (F-Recruitment Requisition)','Get HOD approval','Define JD & KRA/KPI from JD/Timeplan sheet','Post job on portals / internal referral'] },
+      { name:'🔍 Screening', items:['Screen CVs against JD','Schedule telephonic/video interview','Administer relevant test paper (10th/12th/ITI/DME/BE Mech/BE Electrical/HR)','Record scores in Response Sheet'] },
+      { name:'🤝 Interview', items:['Schedule panel interview','Fill Interview Feedback Form','DISC Personality Analysis (optional)','HOD final decision'] },
+      { name:'📄 Offer', items:['Generate Offer Letter via Create Offer Letter sheet','Share with candidate via email (use mail template)','Collect document submission as per checklist','Update Recruitment Tracker'] },
+      { name:'🎒 Pre-Joining', items:['Send joining instructions','Collect: ID proof, PAN, graduation docs, prev offer letter, 3-month salary slips, 2 passport photos','Intimate IT/Admin for laptop/access setup'] }
+    ]
+  },
+  onboarding: {
+    phases: [
+      { name:'📅 Day 0 (Pre-Joining)', items:['Send welcome email with joining details','Prepare workstation / laptop','Create email ID & system access','Assign buddy / mentor','Prepare onboarding kit'] },
+      { name:'🌅 Day 1', items:['Welcome & office tour','Introduction to team','Submit physical documents','Sign appointment letter','ID card issuance','Policy briefing (HR Manual)'] },
+      { name:'📆 Week 1', items:['Induction training schedule','Complete Induction Test online','Meet department HOD','Review JD & KRA/KPIs','Set up tools & software access'] },
+      { name:'🗓 Month 1', items:['30-day check-in with HR','Training plan confirmation','Assign first project/task','Payroll enrollment confirmation','Any open issues resolved'] }
+    ]
+  },
+  exit: {
+    phases: [
+      { name:'📝 Resignation', items:['Receive resignation letter','Acknowledge & confirm notice period','Inform HOD & management','Update HRMS / tracker'] },
+      { name:'⏳ Notice Period', items:['Knowledge transfer plan','Handover documents','Replacement hiring if needed','Exit interview scheduling'] },
+      { name:'🏁 Last Day', items:['Exit interview conducted','Collect company assets (laptop, ID card, etc.)','Revoke system access & email','Full & Final settlement calculation','Issue Experience/Relieving Letter'] }
+    ]
+  },
+  performance: {
+    phases: [
+      { name:'🎯 Goal Setting', items:['Define KRA & KPI with employee (from KPI & KRA Sheet)','Align with company objectives','Document & get sign-off','Set review frequency (monthly/quarterly)'] },
+      { name:'📊 Mid-Year Review', items:['Review KPI achievement %','Identify gaps & support needed','360° feedback collection','Document review outcomes'] },
+      { name:'🏆 Annual Review', items:['Final KPI scoring','Overall performance rating','Salary revision recommendation','Promotion / role change discussion','Individual Development Plan for next year'] }
+    ]
+  }
+};
+
+let checkStates = JSON.parse(localStorage.getItem('kavia_checks') || '{}');
+
+function renderChecklist(containerId, data) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  data.phases.forEach((phase, pi) => {
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'checklist-phase';
+    phaseEl.innerHTML = `<div class="phase-title">${phase.name}</div>`;
+    phase.items.forEach((item, ii) => {
+      const key = `${containerId}_${pi}_${ii}`;
+      const checked = checkStates[key] || false;
+      const itemEl = document.createElement('div');
+      itemEl.className = 'check-item' + (checked ? ' done' : '');
+      itemEl.innerHTML = `<input type="checkbox" id="${key}" ${checked ? 'checked' : ''}><label for="${key}">${item}</label>`;
+      itemEl.querySelector('input').addEventListener('change', function() {
+        checkStates[key] = this.checked;
+        itemEl.classList.toggle('done', this.checked);
+        localStorage.setItem('kavia_checks', JSON.stringify(checkStates));
+      });
+      phaseEl.appendChild(itemEl);
+    });
+    container.appendChild(phaseEl);
+  });
+}
+
+renderChecklist('recruitment-checklist', checklists.recruitment);
+renderChecklist('onboarding-checklist', checklists.onboarding);
+renderChecklist('exit-checklist', checklists.exit);
+renderChecklist('performance-checklist', checklists.performance);
+
+// ── Mail Templates ─────────────────────────────────────────
+const templates = [
+  {
+    name:'📧 Document Submission Request',
+    subject:'Documents Required - Candidature at Kavia Engineering',
+    body:`Hello,
+
+Subsequent to the interview rounds, we would like to take your candidature ahead.
+
+With respect to this, requesting you to share the following documents at the earliest:
+• Identity proof (excluding Aadhar)
+• PAN card
+• Graduation documents
+• Last company appointment letter / offer letter
+• Last 3 months salary slip
+• 2 Passport size photographs
+
+Regards,
+HR Team
+Kavia Engineering Pvt. Ltd.`
+  },
+  {
+    name:'🎉 Employment Offer Letter',
+    subject:'Offer of Employment – [Designation] – Kavia Engineering Pvt. Ltd.',
+    body:`Dear [Candidate Name],
+
+We are pleased to offer you an appointment in our organisation as [Designation] with effect from [Date] on an annual package of Rs. __________.
+
+We look forward to seeing you in our office on [Date] at 10:00 AM at:
+Kavia Engineering Pvt. Ltd., 86-I, Phase 1, Jigani Industrial Area, Anekal Taluk, Bangalore 560105.
+
+Please bring the following scanned documents:
+1. 4 passport size photographs
+2. ID & residence proof (Aadhar / Driving License / Passport)
+3. PAN Card
+4. Educational documents (mark sheets, diploma, certificates)
+5. Last employment offer/appointment letter, relieving letters, salary revision letter, last 3 months salary slips
+
+Please acknowledge this email as acceptance of the offer.
+
+Thanks & Regards,
+Human Resources
+Kavia Engineering Pvt. Ltd.`
+  },
+  {
+    name:'📅 Interview Invitation',
+    subject:'Interview Invitation – [Position] – Kavia Engineering Pvt. Ltd.',
+    body:`Dear [Candidate Name],
+
+Thank you for your interest in the [Position] role at Kavia Engineering Pvt. Ltd.
+
+We are pleased to invite you for an interview:
+Date: [Date]
+Time: [Time]
+Venue: Kavia Engineering Pvt. Ltd., 86-I, Phase 1, Jigani Industrial Area, Anekal Taluk, Bangalore 560105
+OR Video Call: https://meet.jit.si/cbx
+
+Please carry your updated resume and a valid ID proof.
+
+Regards,
+HR Team
+Kavia Engineering Pvt. Ltd.`
+  },
+  {
+    name:'👋 Welcome & Joining Instructions',
+    subject:'Welcome to Kavia Engineering – Joining Details',
+    body:`Dear [Name],
+
+Welcome to the Kavia Engineering family! 🎉
+
+We are delighted to have you onboard as [Designation].
+
+Your joining date: [Date]
+Reporting time: 9:30 AM
+Reporting to: [Manager Name]
+Office address: 86-I, Phase 1, Jigani Industrial Area, Anekal Taluk, Bangalore 560105
+
+Please bring the following on Day 1:
+• Original documents (ID proof, educational certificates)
+• 4 passport-size photographs
+• Bank account details for payroll
+
+Looking forward to seeing you!
+
+Warm Regards,
+HR Team
+Kavia Engineering Pvt. Ltd.`
+  }
+];
+
+const tmplContainer = document.getElementById('mail-templates-container');
+templates.forEach((t, i) => {
+  const el = document.createElement('div');
+  el.className = 'template-card';
+  el.innerHTML = `
+    <h4>${t.name}</h4>
+    <div class="template-subject">Subject: ${t.subject}</div>
+    <div class="template-body">${t.body}</div>
+    <button class="btn-ghost copy-btn" onclick="copyTemplate(${i})">📋 Copy Email</button>
+  `;
+  tmplContainer.appendChild(el);
+});
+
+function copyTemplate(i) {
+  const text = `Subject: ${templates[i].subject}\n\n${templates[i].body}`;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Email copied to clipboard!'));
+}
+
+// ── Toast ──────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── AI Chat ────────────────────────────────────────────────
+const chatWindow = document.getElementById('chat-window');
+const chatInput = document.getElementById('chat-input');
+
+function setQ(q) {
+  chatInput.value = q;
+  chatInput.focus();
+}
+
+function sendQuick(q) {
+  chatInput.value = q;
+  sendMessage();
+}
+
+function addMsg(text, role) {
+  const msg = document.createElement('div');
+  msg.className = 'msg ' + role;
+  const time = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+  msg.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-meta">${role === 'user' ? 'You' : 'KaviaHR Agent'} · ${time}</div>`;
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return msg;
+}
+
+function addTyping() {
+  const el = document.createElement('div');
+  el.className = 'msg bot';
+  el.id = 'typing-indicator';
+  el.innerHTML = '<div class="msg-bubble" style="padding:8px 16px"><div class="typing"><span></span><span></span><span></span></div></div>';
+  chatWindow.appendChild(el);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = chatInput.value.trim();
+  if (!input) return;
+  chatInput.value = '';
+  document.getElementById('send-btn').disabled = true;
+
+  addMsg(input, 'user');
+  addTyping();
+
+  try {
+    const reply = await new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(reject)
+        .askAI(input, 'Kavia HRMS Web App');
+    });
+    removeTyping();
+    addMsg(reply, 'bot');
+  } catch(e) {
+    removeTyping();
+    // Fallback: direct API call
+    try {
+      const key = document.getElementById('api-key-store').value;
+      if (!key || key === 'YOUR_KEY') {
+        addMsg('⚠️ API key nahi mili. Neeche apni Anthropic API key daalo.', 'bot');
+        document.getElementById('api-key-section').style.display = 'block';
+        document.getElementById('send-btn').disabled = false;
+        return;
+      }
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-request-header': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1500,
+          system: 'You are KaviaHR Assistant, an intelligent HR agent for Kavia Engineering Pvt. Ltd., Bangalore. Help with recruitment SOPs, onboarding, performance, payroll, exit process, DISC analysis, offer letters, and HR policies. Address: 86-I, Phase 1, Jigani Industrial Area, Anekal Taluk, Bangalore 560105. Be professional and helpful. For checklists/SOPs provide numbered lists.',
+          messages: [{ role: 'user', content: input }]
+        })
+      });
+      const data = await res.json();
+      if (data.content && data.content[0]) {
+        addMsg(data.content[0].text, 'bot');
+      } else {
+        addMsg('⚠️ Error: ' + (data.error ? data.error.message : 'Unknown error'), 'bot');
+      }
+    } catch(e2) {
+      addMsg('⚠️ Connection error. Please try again.', 'bot');
+    }
+  }
+
+  document.getElementById('send-btn').disabled = false;
+}
+
+async function generateCustomMail() {
+  const input = document.getElementById('mail-custom-input').value.trim();
+  if (!input) return;
+  navigate('ai');
+  setQ('Draft a professional HR email for: ' + input);
+  setTimeout(sendMessage, 300);
+}
+
+// ── API Key ───────────────────────────────────────────────
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) return;
+  document.getElementById('api-key-store').value = k;
+  document.getElementById('key-saved-msg').style.display = 'block';
+  document.getElementById('api-key-input').value = '';
+  setTimeout(() => {
+    document.getElementById('api-key-section').style.background = '#0a2a1a';
+    document.getElementById('api-key-section').style.borderColor = '#00c9a7';
+  }, 500);
+}
+
+// init
+navigate('dashboard');
+</script>
+</body>
+</html>
